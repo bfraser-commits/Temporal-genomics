@@ -1,5 +1,8 @@
+library(data.table)
+library(parallel)
+
 slim <- data.frame(fread("Documents/FIBR_temporal/slims_test/all_pop_sims_min_13_18.txt", header=T))
-I_slim <- subset(slim, pop == "UL")
+I_slim <- subset(slim, pop == "LL")
 I_slim$sel_coef_1 <- (I_slim$pmid - I_slim$p1)
 I_slim$sel_coef_2 <- (I_slim$pt - I_slim$pmid)
 I_slim$sel_coef_total <- (I_slim$pt - I_slim$p1)
@@ -7,28 +10,20 @@ I_slim$sel_coef_total <- (I_slim$pt - I_slim$p1)
 I_slim <- I_slim[!(I_slim$p1 == 1 & I_slim$pt == 1), ]
 #I_slim <- I_slim[I_slim$p1 >= 0.05 & I_slim$p1 <= 0.95, ]
 
-quantile(abs(I_slim$sel_coef_total), 0.99, na.rm = TRUE)
-quantile(abs(I_slim$sel_coef_1), 0.99, na.rm = TRUE)
-quantile(abs(I_slim$sel_coef_2), 0.99, na.rm = TRUE)
 
 
 # Per pop S
 GH_AF <- data.frame(fread("Documents/FIBR_temporal/slims_test/GH.frq.txt"))
-#GH_AF <- data.frame(fread("/gpfs/ts0/projects/Research_Project-T109423/people/bonnie/FIBR_temporal/vcftools/AF_freqs/GH.frq.txt"))
 colnames(GH_AF) <- c("chr","pos","N_ALLELES","N_CHR","REF_ALLELE","REF_FREQ","ALT_ALLELE","ALT_FREQ")
 GH_AF$mutation_id <- paste0(GH_AF$chr,"_",GH_AF$pos)
 GH_AF <- GH_AF[grep("chr",GH_AF$chr),]
 
-# Fetch the minor af as lowest row min of both freqs...
-#GH_maf <- rowMins(as.matrix(GH_AF[,c("REF_FREQ","ALT_FREQ")]),value=T)
-#GH_maf_index <- rowMins(as.matrix(GH_AF[,c("REF_FREQ","ALT_FREQ")]),value=F)
-
-intro_AF_13 <- data.frame(fread(paste0("Documents/FIBR_temporal/slims_test/UL_2013.frq.txt")))
+intro_AF_13 <- data.frame(fread(paste0("Documents/FIBR_temporal/slims_test/LL_2013.frq.txt")))
 colnames(intro_AF_13) <- c("chr","pos","N_ALLELES","N_CHR","REF_ALLELE","REF_FREQ","ALT_ALLELE","ALT_FREQ")
 intro_AF_13$mutation_id <- paste0(intro_AF_13$chr,"_",intro_AF_13$pos)
 intro_AF_13 <- intro_AF_13[grep("chr",intro_AF_13$chr),]
 
-intro_AF_18 <- data.frame(fread(paste0("Documents/FIBR_temporal/slims_test/UL_2018.frq.txt")))
+intro_AF_18 <- data.frame(fread(paste0("Documents/FIBR_temporal/slims_test/LL_2018.frq.txt")))
 colnames(intro_AF_18) <- c("chr","pos","N_ALLELES","N_CHR","REF_ALLELE","REF_FREQ","ALT_ALLELE","ALT_FREQ")
 intro_AF_18$mutation_id <- paste0(intro_AF_18$chr,"_",intro_AF_18$pos)
 intro_AF_18 <- intro_AF_18[grep("chr",intro_AF_18$chr),]
@@ -38,15 +33,11 @@ intro_tmp <- data.frame(mutation_id = GH_AF$mutation_id, p1 = GH_AF$REF_FREQ,
 
 
 intro_tmp$sel_coef_1 <- (intro_tmp$pmid - intro_tmp$p1)
-intro_tmp$sel_coef_2 <- (intro_tmp$pt - intro_tmp$p1)
+intro_tmp$sel_coef_2 <- (intro_tmp$pt - intro_tmp$pmid)
 intro_tmp$sel_coef_total <- (intro_tmp$pt - intro_tmp$p1)
 
 summary(intro_tmp)
 summary(I_slim)
-
-#remove any sites that were fixed in GH
-
-#intro_tmp <- subset(intro_tmp, p1 != 0)
 
 #remove any sites that were fixed at the beginning and end
 intro_tmp <- intro_tmp[!( (intro_tmp$p1 == 0 & intro_tmp$pt == 0) | 
@@ -55,113 +46,52 @@ intro_tmp <- intro_tmp[!( (intro_tmp$p1 == 0 & intro_tmp$pt == 0) |
 #intro_tmp <- intro_tmp[intro_tmp$p1 >= 0.05 & intro_tmp$p1 <= 0.95, ]
 
 
-
-head(intro_tmp)
-head(I_slim)
-
 #now do the starting AF to final AF in slims 
-I_slim <- I_slim %>%
-  mutate(start_bin = cut(p1,
-                         breaks = seq(0, 1, by = 0.1),
-                         include.lowest = TRUE,
-                         right = FALSE,
-                         labels = paste0(seq(0, 0.9, by = 0.1), "-", seq(0.1, 1, by = 0.1))))
+###this is stuff to compare starting AFs cutoffs###
+#I_slim <- I_slim %>%
+#  mutate(start_bin = cut(p1,
+#                         breaks = seq(0, 1, by = 0.1),
+#                         include.lowest = TRUE,
+#                         right = FALSE,
+#                         labels = paste0(seq(0, 0.9, by = 0.1), "-", seq(0.1, 1, by = 0.1))))
 
 
-summary(I_slim)
-
-intro_tmp <- intro_tmp %>%
-  mutate(start_bin = cut(p1,
-                         breaks = seq(0, 1, by = 0.1),
-                         include.lowest = TRUE,
-                         right = FALSE,
-                         labels = paste0(seq(0, 0.9, by = 0.1), "-", seq(0.1, 1, by = 0.1))))
-
-intro_tmp$dataset <- "observed"
-I_slim$dataset <- "simulated"
-head(intro_tmp)
-head(I_slim)
-I_slim <- data.frame(I_slim$mutation_id, I_slim$p1, I_slim$pmid, I_slim$pt, I_slim$sel_coef_1, I_slim$sel_coef_2, I_slim$sel_coef_total, I_slim$start_bin, I_slim$dataset)
-head(I_slim)
-colnames(I_slim) <-c ("mutation_id", "p1", "pmid","pt", "sel_coef_1", "sel_coef_2", "sel_coef_total", "start_bin", "dataset")
-final_df <- data.frame(rbind(intro_tmp, I_slim))
-head(I_slim)
-
-sup_fig <- ggplot(final_df, aes(x = dataset, y = sel_coef_1, fill = dataset)) +
-  geom_violin(alpha = 0.7, position = position_dodge(width = 0.8)) +
-  facet_wrap(~ start_bin, ncol = 3) +
-  scale_fill_manual(values = c("observed" = "steelblue", "simulated" = "orange")) +
-  labs(
-    x = "Dataset",
-    y = "Change in Allele Frequency (ΔAF)",
-    fill = "Dataset",
-    title = "Comparison of ΔAF Distributions by Starting Frequency Bin"
-  ) +
-  theme_minimal()
+#intro_tmp <- intro_tmp %>%
+#  mutate(start_bin = cut(p1,
+#                         breaks = seq(0, 1, by = 0.1),
+#                         include.lowest = TRUE,
+#                         right = FALSE,
+#                         labels = paste0(seq(0, 0.9, by = 0.1), "-", seq(0.1, 1, by = 0.1))))
+#
 
 
-sup_fig
+#intro_tmp$dataset <- "observed"
+#I_slim$dataset <- "simulated"
+#final_df <- data.frame(rbind(intro_tmp, I_slim))
 
-sup_fig <- ggplot(final_df, aes(x = dataset, y = sel_coef_1, fill = dataset)) +
-  geom_violin(alpha = 0.7, position = position_dodge(width = 0.8)) +
-  #  facet_wrap(~ start_bin, ncol = 3) +
-  scale_fill_manual(values = c("observed" = "steelblue", "simulated" = "orange")) +
-  labs(
-    x = "Dataset",
-    y = "Change in Allele Frequency (ΔAF)",
-    fill = "Dataset",
-    title = "Comparison of ΔAF Distributions by Starting Frequency Bin"
-  ) +
-  theme_minimal()
+#sup_fig <- ggplot(final_df, aes(x = dataset, y = sel_coef_1, fill = dataset)) +
+#  geom_violin(alpha = 0.7, position = position_dodge(width = 0.8)) +
+#  facet_wrap(~ start_bin, ncol = 3) +
+#  scale_fill_manual(values = c("observed" = "steelblue", "simulated" = "orange")) +
+#  labs(
+#    x = "Dataset",
+#    y = "Change in Allele Frequency (ΔAF)",
+#    fill = "Dataset",
+#    title = "Comparison of ΔAF Distributions by Starting Frequency Bin"
+#  ) +
+#  theme_minimal()
 
-sup_fig_2 <- ggplot(final_df, aes(x = dataset, y = sel_coef_2, fill = dataset)) +
-  geom_violin(alpha = 0.7, position = position_dodge(width = 0.8)) +
-  #  facet_wrap(~ start_bin, ncol = 3) +
-  scale_fill_manual(values = c("observed" = "steelblue", "simulated" = "orange")) +
-  labs(
-    x = "Dataset",
-    y = "Change in Allele Frequency (ΔAF)",
-    fill = "Dataset",
-    title = "Comparison of ΔAF Distributions by Starting Frequency Bin"
-  ) +
-  theme_minimal()
-
-sup_fig_2
-
-
-sup_fig_tot <- ggplot(final_df, aes(x = dataset, y = sel_coef_total, fill = dataset)) +
-  geom_violin(alpha = 0.7, position = position_dodge(width = 0.8)) +
-  #  facet_wrap(~ start_bin, ncol = 3) +
-  scale_fill_manual(values = c("observed" = "steelblue", "simulated" = "orange")) +
-  labs(
-    x = "Dataset",
-    y = "Change in Allele Frequency (ΔAF)",
-    fill = "Dataset",
-    title = "Comparison of ΔAF Distributions by Starting Frequency Bin"
-  ) +
-  theme_minimal()
-
-sup_fig_tot
-
-
-pdf("Documents/FIBR_temporal/slims_test/LL_sup_figure.pdf", width = 10, heigh=8)
-sup_fig
-dev.off()
-
-head(final_df)
-low_af <- subset(final_df, start_bin == "0.4-0.5" )
-summary(low_af)
-
-ggplot(final_df, aes(x = sel_coef_1, fill = dataset)) +
-  geom_density(alpha = 0.5, position = "identity") +
-  scale_fill_manual(values = c("observed" = "steelblue", "simulated" = "orange")) +
-  labs(
-    x = "Change in Allele Frequency (ΔAF)",
-    y = "Density",
-    fill = "Dataset",
-    title = "Comparison of ΔAF Distributions by Starting Frequency Bin"
-  ) +
-  theme_minimal()
+#sup_fig <- ggplot(final_df, aes(x = dataset, y = sel_coef_1, fill = dataset)) +
+#  geom_violin(alpha = 0.7, position = position_dodge(width = 0.8)) +
+#  scale_fill_manual(values = c("observed" = "steelblue", "simulated" = "orange")) +
+#  labs(
+#    x = "Dataset",
+#    y = "Change in Allele Frequency (ΔAF)",
+#    fill = "Dataset",
+#    title = "Comparison of ΔAF Distributions by Starting Frequency Bin"
+#  ) +
+#  theme_minimal()
+#
 
 
 # Can now take a cutoff from this distribution in absolute terms and highlight SNPs
@@ -191,6 +121,74 @@ nrow(outlier_snps_coef2)
 outlier_snps_coeftot <- intro_tmp[abs(intro_tmp$sel_coef_total) > sim_cutoff_seltot,]
 nrow(outlier_snps_coeftot)
 (nrow(outlier_snps_coeftot)/nrow(intro_tmp))*100
+
+
+#do sup figure
+
+I_obs_tmp <- data.frame(sel_coef_1 = intro_tmp$sel_coef_1, sel_coef_2 = intro_tmp$sel_coef_2, sel_coef_tot = intro_tmp$sel_coef_total, dataset= "observed")
+I_slim_tmp <-  data.frame(sel_coef_1 = I_slim$sel_coef_1, sel_coef_2 = I_slim$sel_coef_2, sel_coef_tot = I_slim$sel_coef_total, dataset= "simulated")
+
+final_df <- data.frame(rbind(I_obs_tmp, I_slim_tmp))
+head(final_df)
+
+
+sel_1_fig <- ggplot(final_df, aes(x = dataset, y = abs(sel_coef_1), fill = dataset)) +
+  geom_violin(alpha = 0.7, position = position_dodge(width = 0.8)) +
+  scale_fill_manual(values = c("observed" = "steelblue", "simulated" = "orange")) +
+  geom_hline(yintercept = sim_cutoff_sel1, linetype = "dashed", color = "darkgrey")+
+labs(
+  title = "Period 1",
+  x = "",
+  y = "Absolute delta AF",
+  fill = "Dataset",
+) +
+  theme_minimal()+
+  theme(legend.position = "none")
+
+sel_1_fig
+
+sel_2_fig <- ggplot(final_df, aes(x = dataset, y = abs(sel_coef_2), fill = dataset)) +
+  geom_violin(alpha = 0.7, position = position_dodge(width = 0.8)) +
+  scale_fill_manual(values = c("observed" = "steelblue", "simulated" = "orange")) +
+  geom_hline(yintercept = sim_cutoff_sel2, linetype = "dashed", color = "darkgrey")+
+  labs(
+    title = "Period 2",
+    x = "",
+    y = "Absolute delta AF",
+    fill = "Dataset",
+  ) +
+  theme_minimal()+
+  theme(legend.position = "none")
+
+sel_2_fig
+
+
+sel_tot_fig <- ggplot(final_df, aes(x = dataset, y = abs(sel_coef_tot), fill = dataset)) +
+  geom_violin(alpha = 0.7, position = position_dodge(width = 0.8)) +
+  scale_fill_manual(values = c("observed" = "steelblue", "simulated" = "orange")) +
+  geom_hline(yintercept = sim_cutoff_seltot, linetype = "dashed", color = "darkgrey")+
+  labs(
+    title = "Total Period",
+    x = "Dataset",
+    y = "Absolute delta AF",
+    fill = "Dataset",
+  ) +
+  theme_minimal()+
+  theme(legend.position = "none")
+
+sel_tot_fig
+
+combined_plot <- plot_grid(sel_1_fig, sel_2_fig, sel_tot_fig, ncol=1, labels = c("A", "B", "C"), align = "v")
+
+final_plot <- plot_grid(
+  ggdraw() + 
+    draw_label("LL",  fontface = 'bold', size = 16, x = 0.5, hjust = 0.5), 
+  combined_plot, ncol = 1,  rel_heights = c(0.1, 1.5)  
+)
+
+pdf("Documents/FIBR_temporal/slims_test/LL_sup_fig_straightcutoff.pdf", height = 6, width = 3)
+final_plot
+dev.off()
 
 # How are these organised among chromosomes
 table(outlier_snps_coef1$chr)
@@ -229,7 +227,7 @@ winds<-data.frame(rbindlist(mclapply(chrs,function(x){
     out$window<-y
     out$BP1<-as.integer(winds1[y])+1
     out$BP2<-as.integer(winds2[y])
-    out$comp<-'UL'
+    out$comp<-'TA'
     colnames(out)<-c('outlier_count_sel1','outlier_count_sel2', 'outlier_count_seltot', 'site_count', "mean_sel1", "mean_sel2", "mean_seltot", 'chr','window','BP1','BP2','comp')
     return(out)
   })))
@@ -241,7 +239,7 @@ summary(winds)
 summary(winds$mean_sel2)
 table(winds$chr)
 
-write.table(winds, file = "Documents/FIBR_temporal/UL_99straight_cutoff_50kb.txt", quote=F, row.names=F)
+write.table(winds, file = "Documents/FIBR_temporal/TA_99straight_cutoff_50kb.txt", quote=F, row.names=F)
 
 ###test
 chr <- subset(winds, chr == "chr15")
@@ -258,7 +256,5 @@ chrom_plot
 
 chrom_plot <- ggplot(chr, aes(x=(BP1+500), y=mean_sel1))+
   geom_point(size = 0.5)+
-#  geom_point(aes(x = BP1 + 500, y = outlier_count_sel2), color = "red", size = 0.5)+ 
- # geom_point(aes(x = BP1 + 500, y = outlier_count_seltot), color = "blue", size = 0.5)+
   scale_x_continuous(name = "pos (MB)", labels=c(0,5,10,15,20,25,30,35,40,45), breaks=c(0,5000000,10000000,15000000,20000000,25000000,30000000,35000000,40000000,45000000))+
   theme_bw()
