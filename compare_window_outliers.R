@@ -178,3 +178,6 @@ LL_chrom_plot <- ggplot(LL_chr, aes(x=(BP1+500), y=(outlier_count_sel1/site_coun
 LL_chrom_plot
 
 plot_grid(CA_chrom_plot, TA_chrom_plot, LL_chrom_plot, UL_chrom_plot)
+
+
+##make genome-wide plots for each measure for sup###
