@@ -21,7 +21,7 @@ explore_data_nopol_13_18.R
 
 ~/Documents/FIBR_temporal/compare_window_outliers.R
 
-#Second set of slim analysis uses forward WF model with a vcf from GH of 1 chromosome, all other parameters are the same as above
+####Second set of slim analysis uses forward WF model with a vcf from GH of 1 chromosome, all other parameters are the same as above, this is likely what will be going in the paper in this directory: people/bonnie/FIBR_temporal/vcftools/slims/
 
 02_run_fibr_v5_vcf_min_outs.sh
 
@@ -31,7 +31,18 @@ input_vcf_output_pos_slim.slim
 #will take input and windowise it for comparisons
 windowise_slims.R
 
+#will take slim output to get AF cut-offs
+explore_data_nopol_13_18_$POP.R
+
 #will compare observed windows to simulate ones, get cutoffs and do overlap analysis and sup figures
 ~/Documents/FIBR_temporal/window_analysis_slim_vcf_cutoff.R
+
+#to create upset plots
+
+#to create AF direction plots
+
+#to do GO enrichment and gene annotation of candidates
+
+
 
 
