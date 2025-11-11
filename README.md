@@ -1,6 +1,26 @@
 # FIBR_temporal
-code to accompany FIBR temporal paper
+#code to accompany FIBR temporal paper
+#Read mapping, SNP calling, and filtering were done as in Whiting et al. 2020
+#cite Paris github
+#Demographic changes across time figure: R script
 
+#PCA analysis
+#plink scripts:
+#figure was plotted using R
+
+#Whole genome population genomics
+#popgenome scripts
+#R plotting script
+
+#ROH analysis
+#plink script
+#R plotting script
+
+#CVTK analysis
+#cvtk modified python script
+#R plotting script
+
+#Simulation of Selective sweeps
 #First set of slim analysis uses a forward WF model coalescent burn-in, a minimum population size per generation and does not filter for low frequencies in the output
 
 02_run_fibr_AF_sims_2018_v5_wFounding_min.sh
@@ -37,9 +57,12 @@ explore_data_nopol_13_18_$POP.R
 #will compare observed windows to simulate ones, get cutoffs and do overlap analysis and sup figures
 ~/Documents/FIBR_temporal/window_analysis_slim_vcf_cutoff.R
 
-#to create upset plots
+#to plot and analyse AF direction of change 
 
-#to create AF direction plots
+#annotations of genome
+#cite Paris github
+
+#script to pull out annotations
 
 #to do GO enrichment and gene annotation of candidates
 
