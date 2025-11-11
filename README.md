@@ -2,7 +2,8 @@
 #code to accompany FIBR temporal paper
 #Read mapping, SNP calling, and filtering were done as in Whiting et al. 2020
 #cite Paris github
-#Demographic changes across time figure: R script
+#Demographic changes across time figure
+census_plot_new.R
 
 #PCA analysis
 #plink scripts:
