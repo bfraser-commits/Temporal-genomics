@@ -23,10 +23,16 @@ TajD_figures.R
 
 #ROH analysis
 #plink script
-#R plotting script
+plink_ROH.sh
+
+#R plotting and analysis script
+ROH_analysis.R
 
 #CVTK analysis
-#cvtk modified python script
+#first make a vcf that has GH replicated for the design in cvtk to work:
+
+#cvtk modified python script:
+
 #R plotting script
 
 #Simulation of Selective sweeps
