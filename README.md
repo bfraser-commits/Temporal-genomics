@@ -6,7 +6,10 @@
 
 #PCA analysis
 #plink scripts:
+pca_FIBR_temp_plink.sh
+
 #figure was plotted using R
+pca_plot.R
 
 #Whole genome population genomics
 #popgenome scripts
