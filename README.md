@@ -7,25 +7,34 @@ census_plot_new.R
 
 #PCA analysis
 #plink scripts:
+
 pca_FIBR_temp_plink.sh
 
 #figure was plotted using R
+
 pca_plot.R
 
 #Whole genome population genomics
 #popgenome script:
+
 popgenome_FIBR_temp_50kb.R
 
 #R plotting and analysis scripts:
+
 FST_year_figure.R
+
 pi_figures.R
+
 TajD_figures.R
 
 #ROH analysis
+
 #plink script
+
 plink_ROH.sh
 
 #R plotting and analysis script
+
 ROH_analysis.R
 
 #CVTK analysis
