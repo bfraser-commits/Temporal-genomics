@@ -13,8 +13,13 @@ pca_FIBR_temp_plink.sh
 pca_plot.R
 
 #Whole genome population genomics
-#popgenome scripts
-#R plotting script
+#popgenome script:
+popgenome_FIBR_temp_50kb.R
+
+#R plotting and analysis scripts:
+FST_year_figure.R
+pi_figures.R
+TajD_figures.R
 
 #ROH analysis
 #plink script
