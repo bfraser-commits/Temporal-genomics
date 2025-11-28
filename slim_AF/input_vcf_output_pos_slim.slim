@@ -1,0 +1,98 @@
+initialize() {
+initializeSLiMOptions(nucleotideBased=T);
+length = initializeAncestralNucleotides("STAR.chr22_noNCap.fa");
+defineConstant("L", length);
+initializeMutationTypeNuc("m1", 0.5, "f", 0.0);
+//initializeGenomicElementType("g1", m1, 1.0);
+initializeGenomicElementType("g1", m1, 1.0, mmJukesCantor(0.0));
+initializeGenomicElement(g1, 0, L-1);
+initializeRecombinationRate(1e-8);
+
+}
+1 late() {
+sim.addSubpop("p1", 19);
+p1.haplosomes.readHaplosomesFromVCF("GH_chr22.recode.vcf", m1);
+p1.setSubpopulationSize(20000);
+
+// Make our p2
+	sim.addSubpopSplit("p2",20000,p1);
+	
+	// Kill our p1
+	p1.setSubpopulationSize(0);
+
+
+// Take a sample of individuals, and then get the genomes
+        s = sample(p2.individuals, 19).haplosomes;
+        
+        // Now the mutations segregating within the sample
+        muts = unique(s.mutations);
+        
+        // then for every mutation find the frequency
+        freqs = sapply(muts, "mean(s.containsMutations(applyValue));");
+        
+        // Remove very low frequency mutations
+        //muts = muts[which(freqs > 0.01 & freqs < 0.99)];
+        //freqs = freqs[which(freqs > 0.01 & freqs < 0.99)];
+        
+        
+        // Set up titles
+        catn("mutation_id " + " " + "freq" + " " + "generation");
+        
+        // Print to output
+        for(i in 0:(length(muts)-1)){
+             //   catn(muts[i].id + " " + freqs[i] + " " + sim.cycle);
+        	catn(muts[i].position + " " + freqs[i] + " " + sim.cycle);    
+	    //print(out_m);
+        }
+
+}
+
+// From here on, we will read in the values from the demography file and create a new population
+        2:30 late() {
+         //late () {
+
+        demo_file = readFile(demo_data);
+        total_generations = length(demo_file);
+        //catn("Running late() at generation " + sim.cycle);
+        //catn("Total generations from demo file: " + total_generations);
+         
+                if(sim.cycle > 1 & sim.cycle <= total_generations ){
+                //if(sim.cycle > 1) {
+                // Fetch our demography values (-1 here as zero indexed and we have column names)
+                female_mean = asFloat(strsplit(demo_file[sim.cycle-1],"\t")[1]);
+                female_sd = asFloat(strsplit(demo_file[sim.cycle-1],"\t")[2]);
+                male_mean = asFloat(strsplit(demo_file[sim.cycle-1],"\t")[3]);
+                male_sd = asFloat(strsplit(demo_file[sim.cycle-1],"\t")[4]);
+
+
+                
+                // Calculate new size with error
+                new_size = asInteger(rnorm(1,female_mean,female_sd) + rnorm(1,male_mean,male_sd));
+                
+                // Set our new population size
+                p2.setSubpopulationSize(new_size);
+               // Take a sample of individuals, and then get the genomes
+                s = sample(p2.individuals, 20).haplosomes;
+                
+                // Now the mutations segregating within the sample
+                muts = unique(s.mutations);
+                
+                // then for every mutation find the frequency
+                freqs = sapply(muts, "mean(s.containsMutations(applyValue));");
+                
+                
+                // Print to output
+                for(i in 0:(length(muts)-1)){
+                        //catn(muts[i].id + " " + freqs[i] + " " + sim.cycle);
+                        catn(muts[i].position + " " + freqs[i] + " " + sim.cycle);
+			//print(out_m);
+                        
+                }
+                
+        
+        } else {
+                
+                /// Finish
+        sim.simulationFinished();
+        }
+      }
