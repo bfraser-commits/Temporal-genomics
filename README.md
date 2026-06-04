@@ -1,17 +1,16 @@
 # FIBR_temporal
 #code to accompany FIBR temporal paper
+
 #Read mapping, SNP calling, and filtering were done as in Whiting et al. 2020
-#cite Paris github
+https://github.com/josieparis/gatk-snp-calling
+
 #Demographic changes across time figure
 census_plot_new.R
 
 #PCA analysis
-#plink scripts:
-
 pca_FIBR_temp_plink.sh
 
 #figure was plotted using R
-
 pca_plot.R
 
 #Whole genome population genomics
@@ -46,11 +45,9 @@ ROH_analysis.R
 
 #Simulation of Selective sweeps
 #Run slim simulations:
-02_run_fibr_v5_vcf_min_outs.sh
-#calls:
-input_vcf_output_pos_slim.slim
 
-#Analyse and find cut-offs for windoes
+
+#Analyse and find cut-offs for windows
 #will take input and windowise it for comparisons
 windowise_slims.R
 
@@ -61,9 +58,6 @@ explore_data_nopol_13_18_$POP.R
 window_analysis_slim_vcf_cutoff.R
 
 #to plot and analyse AF direction of change 
-
-#annotations of genome
-#cite Paris github
 
 #script to pull out annotations
 
