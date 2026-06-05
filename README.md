@@ -36,16 +36,25 @@ plink_ROH.sh
 
 ROH_analysis.R
 
+#SLIMs for neutral analysis
+
 #CVTK analysis
 #first make a vcf that has GH replicated for the design in cvtk to work:
 
 #cvtk modified python script:
+FIBR_real_data.py
 
-#R plotting script
+#to run on each chromosome
+run_cvtk_chrs.sh
+FIBR_chr_test.py
+chr_plots_violin.R
 
-#Simulation of Selective sweeps
-#Run slim simulations:
+#to run cvtk on slims
+run_cvtk_slims.sh 
 
+#to plot results
+plot_WG_percentile_calc.R
+diagnostic_plots.R
 
 #Analyse and find cut-offs for windows
 #will take input and windowise it for comparisons
