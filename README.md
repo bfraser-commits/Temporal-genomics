@@ -37,6 +37,13 @@ plink_ROH.sh
 ROH_analysis.R
 
 #SLIMs for neutral analysis
+#SLIM analysis
+input_vcf_output_vcf_mult_outs_all_pops_FINAL.slim
+#run multiple times
+run_vcf_all_pops.sh 
+
+#format outputs to run into CVTK
+#format outputs to compare AFs
 
 #CVTK analysis
 #first make a vcf that has GH replicated for the design in cvtk to work:
@@ -51,6 +58,7 @@ chr_plots_violin.R
 
 #to run cvtk on slims
 run_cvtk_slims.sh 
+slims_out_all.sh 
 
 #to plot results
 plot_WG_percentile_calc.R
@@ -68,9 +76,9 @@ window_analysis_slim_vcf_cutoff.R
 
 #to plot and analyse AF direction of change 
 
-#script to pull out annotations
-
-#to do GO enrichment and gene annotation of candidates
+#script to pull out annotations and run through GO analysis
+candidate_region_analysis.sh
+Biomart.R 
 
 
 
