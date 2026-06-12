@@ -42,9 +42,6 @@ input_vcf_output_vcf_mult_outs_all_pops_FINAL.slim
 #run multiple times
 run_vcf_all_pops.sh 
 
-#format outputs to run into CVTK
-#format outputs to compare AFs
-
 #CVTK analysis
 #first make a vcf that has GH replicated for the design in cvtk to work:
 
