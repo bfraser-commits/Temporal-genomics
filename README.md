@@ -1,4 +1,4 @@
-# FIBR_temporal
+# Temporal genomics code
 #code to accompany FIBR temporal paper
 
 #Read mapping, SNP calling, and filtering were done as in Whiting et al. 2020
