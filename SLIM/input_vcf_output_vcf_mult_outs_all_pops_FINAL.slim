@@ -1,0 +1,147 @@
+initialize() {
+initializeSLiMOptions(nucleotideBased=T);
+length = initializeAncestralNucleotides("STAR.chr22_noNCap.fa");
+defineConstant("L", length); 
+initializeMutationTypeNuc("m1", 0.5, "f", 0.0);
+//initializeGenomicElementType("g1", m1, 1.0);
+initializeGenomicElementType("g1", m1, 1.0, mmJukesCantor(0.0));
+initializeGenomicElement(g1, 0, L-1);
+initializeRecombinationRate(1e-8);
+
+}
+1 late() {
+sim.addSubpop("p1", 19);
+p1.haplosomes.readHaplosomesFromVCF("GH_chr22.recode.vcf", m1);
+p1.setSubpopulationSize(20000);
+
+// Make our p2
+	sim.addSubpopSplit("p2",20000,p1);
+
+//make p3
+	sim.addSubpopSplit("p3", 20000, p1);
+	
+//make p4	
+	sim.addSubpopSplit("p4", 20000, p1);
+
+//make p5
+	sim.addSubpopSplit("p5", 20000, p1);
+	
+	// Kill our p1
+	p1.setSubpopulationSize(0);
+	
+	// Sample 20 individuals and output VCF at generation 1
+    sampled_individuals = sample(p2.individuals, 20).haplosomes;
+    sampled_individuals.outputHaplosomesToVCF(OUTPUT_PREFIX + "_generation_1.vcf");
+//		sampled_individuals.outputHaplosomesToVCF("/Users/bonniefraser/Documents/FIBR_temporal/cvtk/slim5_slims/test_generation_1.vcf");
+
+
+}
+
+// From here on, we will read in the values from the demography file and create a new population
+        2:24 late() {
+         //late () {
+
+      // demo_file = readFile(demo_data);
+			demo_file_p2 = readFile("data/CA_2018_simulation_demography_min.txt");    
+			demo_file_p3 = readFile("data/TY_2018_simulation_demography_min.txt");
+			demo_file_p4 = readFile("data/LL_2018_simulation_demography_min.txt");
+			demo_file_p5 = readFile("data/UL_2018_simulation_demography_min.txt");
+			
+        total_generations_p2 = length(demo_file_p2);
+        total_generations_p3 = length(demo_file_p3);
+        total_generations_p4 = length(demo_file_p4);
+        total_generations_p5 = length(demo_file_p5);
+         
+   //p2 demographics      
+                if(sim.cycle > 1 & sim.cycle <= total_generations_p2){
+                //if(sim.cycle > 1) {
+                // Fetch our demography values (-1 here as zero indexed and we have column names)
+                female_mean = asFloat(strsplit(demo_file_p2[sim.cycle-1],"\t")[1]);
+                female_sd = asFloat(strsplit(demo_file_p2[sim.cycle-1],"\t")[2]);
+                male_mean = asFloat(strsplit(demo_file_p2[sim.cycle-1],"\t")[3]);
+                male_sd = asFloat(strsplit(demo_file_p2[sim.cycle-1],"\t")[4]);
+                
+                // Calculate new size with error
+                new_size_p2 = asInteger(rnorm(1,female_mean,female_sd) + rnorm(1,male_mean,male_sd));
+                
+                // Set our new population size
+                p2.setSubpopulationSize(new_size_p2);
+               }
+  //p3 demographics
+  			if(sim.cycle > 1 & sim.cycle <= total_generations_p3){
+                //if(sim.cycle > 1) {
+                // Fetch our demography values (-1 here as zero indexed and we have column names)
+                female_mean_p3 = asFloat(strsplit(demo_file_p3[sim.cycle-1],"\t")[1]);
+                female_sd_p3 = asFloat(strsplit(demo_file_p3[sim.cycle-1],"\t")[2]);
+                male_mean_p3 = asFloat(strsplit(demo_file_p3[sim.cycle-1],"\t")[3]);
+                male_sd_p3 = asFloat(strsplit(demo_file_p3[sim.cycle-1],"\t")[4]);
+                
+                // Calculate new size with error
+                new_size_p3 = asInteger(rnorm(1,female_mean_p3,female_sd_p3) + rnorm(1,male_mean_p3,male_sd_p3));
+                
+                // Set our new population size
+                p3.setSubpopulationSize(new_size_p3);
+               }
+    
+    //p4 demographics
+  			if(sim.cycle > 1 & sim.cycle <= total_generations_p4){
+                female_mean_p4 = asFloat(strsplit(demo_file_p4[sim.cycle-1],"\t")[1]);
+                female_sd_p4 = asFloat(strsplit(demo_file_p4[sim.cycle-1],"\t")[2]);
+                male_mean_p4 = asFloat(strsplit(demo_file_p4[sim.cycle-1],"\t")[3]);
+                male_sd_p4 = asFloat(strsplit(demo_file_p4[sim.cycle-1],"\t")[4]);
+                
+                // Calculate new size with error
+                new_size_p4 = asInteger(rnorm(1,female_mean_p4,female_sd_p4) + rnorm(1,male_mean_p4,male_sd_p4));
+                
+                // Set our new population size
+                p4.setSubpopulationSize(new_size_p4);
+               }
+    //p5 demographics
+  			if(sim.cycle > 1 & sim.cycle <= total_generations_p5){
+                female_mean_p5 = asFloat(strsplit(demo_file_p5[sim.cycle-1],"\t")[1]);
+                female_sd_p5 = asFloat(strsplit(demo_file_p5[sim.cycle-1],"\t")[2]);
+                male_mean_p5 = asFloat(strsplit(demo_file_p5[sim.cycle-1],"\t")[3]);
+                male_sd_p5 = asFloat(strsplit(demo_file_p5[sim.cycle-1],"\t")[4]);
+                
+                // Calculate new size with error
+                new_size_p5 = asInteger(rnorm(1,female_mean_p5,female_sd_p5) + rnorm(1,male_mean_p5,male_sd_p5));
+                
+                // Set our new population size
+                p5.setSubpopulationSize(new_size_p5);
+               }                    
+                        
+ // Output VCF files for specific generations
+    if (sim.cycle == 8) {
+        sampled_individuals = sample(p2.individuals, 10).haplosomes;
+        sampled_individuals.outputHaplosomesToVCF(OUTPUT_PREFIX + "_CA_generation_8.vcf");
+         sampled_individuals_p3 = sample(p3.individuals, 12).haplosomes;
+        sampled_individuals_p3.outputHaplosomesToVCF(OUTPUT_PREFIX + "_TA_generation_8.vcf");
+    }
+    else if (sim.cycle == 10) {
+    	 sampled_individuals_p4 = sample(p4.individuals, 13).haplosomes;
+        sampled_individuals_p4.outputHaplosomesToVCF(OUTPUT_PREFIX + "_LL_generation_8.vcf");
+         sampled_individuals_p5 = sample(p5.individuals, 13).haplosomes;
+        sampled_individuals_p5.outputHaplosomesToVCF(OUTPUT_PREFIX + "_UL_generation_8.vcf");
+     }   
+    else if (sim.cycle == 18) {
+        sampled_individuals = sample(p2.individuals, 22).haplosomes;
+    //    sampled_individuals.outputHaplosomesToVCF(OUTPUT_PREFIX + "_generation_18.vcf");
+    	sampled_individuals.outputHaplosomesToVCF(OUTPUT_PREFIX + "_CA_generation18.vcf");
+    	sampled_individuals_p3 = sample(p3.individuals, 23).haplosomes;
+    	sampled_individuals_p3.outputHaplosomesToVCF(OUTPUT_PREFIX + "_TA_generation18.vcf");
+    	}
+    	
+    	else if (sim.cycle == 22) {
+    	sampled_individuals_p4 = sample(p4.individuals, 22).haplosomes;
+   	sampled_individuals_p4.outputHaplosomesToVCF(OUTPUT_PREFIX + "_LL_generation18.vcf");
+   	sampled_individuals_p5 = sample(p5.individuals, 24).haplosomes;
+   	sampled_individuals_p5.outputHaplosomesToVCF(OUTPUT_PREFIX + "_UL_generation18.vcf");
+  }
+    
+}
+
+// Finalize simulation at generation 30
+24 late() {
+    sim.simulationFinished();
+}
+
