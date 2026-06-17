@@ -79,21 +79,10 @@ plot_WG_percentile_calc.R
 
 diagnostic_plots.R
 
-#Analyse and find cut-offs for windows
-
-#will take input and windowise it for comparisons
-
-windowise_slims.R
-
-#will take slim output to get AF cut-offs
-
-explore_data_nopol_13_18_$POP.R
-
-#will compare observed windows to simulate ones, get cutoffs and do overlap analysis and sup figures
-
-window_analysis_slim_vcf_cutoff.R
 
 #to plot and analyse AF direction of change 
+Allele_change_density_figures.R
+window_analysis_slim_vcf_cutoff_FINAL.R
 
 #script to pull out annotations and run through GO analysis
 
